@@ -1,0 +1,38 @@
+*---+----1----+----2----+----3----+----4----+----5----+----6----+----7-*--------
+* COLUMN RULER: CONTENT COLS 1-71 | COL 72=CONT | COLS 73-80=SEQUENCE   --------
+*                                                                       00000003
+SAMPLE   CSECT                                                          00000010
+         USING *,R12                                                    00000020
+         STM   R14,R12,12(R13)                      SAVE REGISTERS      00000030
+         LR    R12,R15                               BASE REGISTER      00000040
+*                                                                       00000050
+         LA    R1,MSG                                LOAD ADDRESS       00000060
+         MVC   BUFFER(12),MSG                        COPY MESSAGE       00000070
+         CLI   BUFFER,C'H'                           TEST FIRST BYTE    00000080
+         BE    DONE                                  BRANCH IF EQUAL    00000090
+         CLC   BUFFER(5),=X'C8C5D3D3D6'             EBCDIC CHECK        00000100
+         LA    R3,4096                               A NUMBER           00000110
+DONE     DS    0H                                    ALIGNMENT          00000120
+         LM    R14,R12,12(R13)                       RESTORE            00000130
+         BR    R14                                   RETURN             00000140
+*                                                                       00000150
+MSG      DC    C'HELLO, ABE!'                        MESSAGE TEXT       00000160
+BUFFER   DS    CL80                                  WORK AREA          00000170
+COUNTER  DC    F'0'                                  FULLWORD           00000180
+HEXVAL   DC    X'FF00'                               HEX CONSTANT       00000190
+*                                                                       00000200
+* CONTINUATION DEMO: X IN COL 72 MEANS OPERAND CONTINUES AT COL 16      00000210
+*                                                                       00000220
+         MVC   OUTAREA(44),=C'THIS STRING IS LONG ENOUGH TO NEED A CONTX00000230
+               INUATION ON THE NEXT LINE'                               00000240
+*                                                                       00000250
+         MACRO                                                          00000260
+&LBL     MYMAC &REG,&ADDR                                               00000270
+         AIF   ('&REG' EQ '').NOREG                                     00000280
+&LBL     L     &REG,&ADDR                           LOAD PARAMETER      00000290
+         AGO   .DONE                                                    00000300
+.NOREG   ANOP                                                           00000310
+         MNOTE 4,'REGISTER REQUIRED'                                    00000320
+.DONE    MEND                                                           00000330
+*                                                                       00000340
+         END   SAMPLE                                                   00000350

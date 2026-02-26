@@ -1,0 +1,8 @@
+LIBRARY HLASMLexer
+EXPORTS
+    isUnicode
+    setInfo
+    getName
+    getFuncsArray
+    beNotified
+    messageProc
