@@ -4,6 +4,7 @@
  * Direct Scintilla styling via SendMessage. No ILexer5, no vtable,
  * no cross-compiler ABI roulette. Just column parsing and
  * SCI_SETSTYLING, like civilised folk.
+ * Also yeah I did basically copy other Plugins I dont know c++ OOP scares me.
  *
  * 80-column card layout (0-indexed):
  *   Col 0-70    Content (label, operation, operand, remarks)
