@@ -1,4 +1,9 @@
 @echo off
+REM  Build HLASMLexer.dll — needs MinGW-w64 g++ in PATH
+REM  Get it from https://winlibs.com or: choco install mingw
+
+where g++ >nul 2>&1 || (echo g++ not found — install MinGW-w64 & goto :end)
+
 if not exist obj mkdir obj
 if not exist bin mkdir bin
 
@@ -11,11 +16,10 @@ g++ -shared -static -o bin\HLASMLexer.dll obj\hlasm_lexer.o exports.def -s -luse
 if errorlevel 1 goto :fail
 
 echo.
-echo OK: bin\HLASMLexer.dll (copy to Notepad++\plugins\HLASMLexer\)
+echo Done: bin\HLASMLexer.dll
+echo Copy to: Notepad++\plugins\HLASMLexer\HLASMLexer.dll
 goto :end
 
 :fail
-echo.
 echo BUILD FAILED
-
 :end
