@@ -1,8 +1,8 @@
 @echo off
-REM  Build HLASMLexer.dll — needs MinGW-w64 g++ in PATH
+REM  Build HLASMLexer.dll - needs MinGW-w64 g++ in PATH
 REM  Get it from https://winlibs.com or: choco install mingw
 
-where g++ >nul 2>&1 || (echo g++ not found — install MinGW-w64 & goto :end)
+where g++ >nul 2>&1 || (echo g++ not found - install MinGW-w64 & goto :end)
 
 if not exist obj mkdir obj
 if not exist bin mkdir bin
