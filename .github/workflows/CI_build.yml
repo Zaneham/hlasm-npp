@@ -40,7 +40,7 @@ jobs:
 
     steps:
     - name: Checkout repo
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
 
     - name: Install and update MSYS2 tools
       uses: msys2/setup-msys2@v2
@@ -73,11 +73,11 @@ jobs:
       run: 7z a HLASMLexer_${{ steps.tagName.outputs.tag }}_${{ matrix.env }}.zip .\bin\HLASMLexer.dll
 
     - name: Archive artifacts for ${{ matrix.msys }} / ${{ matrix.configuration }}
-      if: matrix.build_configuration == 'Release'
+      if: matrix.configuration == 'Release'
       uses: actions/upload-artifact@v7
       with:
-          name: HLASMLexer_${{ steps.tagName.outputs.tag }}_${{ matrix.build_platform }}.zip
-          path: HLASMLexer_${{ steps.tagName.outputs.tag }}_${{ matrix.build_platform }}.zip
+          name: HLASMLexer_${{ steps.tagName.outputs.tag }}_${{ matrix.env }}.zip
+          path: HLASMLexer_${{ steps.tagName.outputs.tag }}_${{ matrix.env }}.zip
 
     - name: Create release on tagging
       uses: softprops/action-gh-release@v3
