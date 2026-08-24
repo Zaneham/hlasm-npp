@@ -61,7 +61,7 @@ Search **Plugins → Plugins Admin** for "HLASM", tick it, install. Colours are 
 3. **Restart Notepad++.** "HLASM" now appears in the **Language** menu.
 4. Open an HLASM source file (`.mlc`, `.mac`, `.cpy`). It highlights automatically and stays highlighted, no further action.
 
-The colours are set by the lexer itself, so nothing else is required. If you want to **customise** them through **Settings → Style Configurator**, also drop `config\HLASMLexer.xml` into `…\Notepad++\plugins\Config\`.
+Notepad++ will not load any external lexer unless `plugins\Config\HLASMLexer.xml` exists, and it reports a missing one as though the DLL were incompatible. The plugin writes that file itself on first launch, so there is nothing to copy. Edit it if you want to change the colours through **Settings → Style Configurator**, and it will be left alone from then on.
 
 ### File extensions
 
@@ -82,12 +82,13 @@ The `ILexer5` version registers HLASM as the buffer's actual lexer, so Notepad++
 ### Build
 
 ```bat
-g++ -c -Wall -Wextra -O2 -std=c++11 -DUNICODE -D_UNICODE -Isrc -o obj\hlasm_ilexer.o src\hlasm_ilexer.cpp
+copy /b src\config_xml_head.inc + config\HLASMLexer.xml + src\config_xml_tail.inc obj\hlasm_config_xml.h
+g++ -c -Wall -Wextra -O2 -std=c++11 -DUNICODE -D_UNICODE -Isrc -Iobj -o obj\hlasm_ilexer.o src\hlasm_ilexer.cpp
 windres --output-format=coff src\HLASMLexer.rc -o obj\HLASMLexer.res
 g++ -shared -static -o bin\HLASMLexer.dll obj\hlasm_ilexer.o obj\HLASMLexer.res exports.def -s -luser32
 ```
 
-Or just run `build.bat`.
+The first line generates the styling XML into the binary, so `config\HLASMLexer.xml` stays the only copy worth editing. Or just run `build.bat`.
 
 ## Architecture
 

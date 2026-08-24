@@ -11,6 +11,7 @@
 if command -v x86_64-w64-mingw32-g++ >/dev/null 2>&1; then
     CXX=x86_64-w64-mingw32-g++
     WINDRES=x86_64-w64-mingw32-windres
+    command -v "$WINDRES" >/dev/null 2>&1 || WINDRES=windres
 elif command -v g++ >/dev/null 2>&1; then
     CXX=g++
     WINDRES=windres
@@ -30,14 +31,17 @@ command -v "$WINDRES" >/dev/null 2>&1 || { echo "$WINDRES not found (part of the
 echo "Toolchain: $CXX / $WINDRES"
 mkdir -p obj bin
 
+echo "Generating config XML header..."
+cat src/config_xml_head.inc config/HLASMLexer.xml src/config_xml_tail.inc > obj/hlasm_config_xml.h || exit 1
+
 echo "Compiling..."
-"$CXX" -c -Wall -Wextra -O2 -std=c++11 -DUNICODE -D_UNICODE -o obj/hlasm_lexer.o src/hlasm_lexer.cpp || exit 1
+"$CXX" -c -Wall -Wextra -O2 -std=c++11 -DUNICODE -D_UNICODE -Isrc -Iobj -o obj/hlasm_ilexer.o src/hlasm_ilexer.cpp || exit 1
 
 echo "Resource..."
 "$WINDRES" --output-format=coff src/HLASMLexer.rc -o obj/HLASMLexer.res || exit 1
 
 echo "Linking..."
-"$CXX" -shared -static -o bin/HLASMLexer.dll obj/hlasm_lexer.o obj/HLASMLexer.res exports.def -s -luser32 || exit 1
+"$CXX" -shared -static -o bin/HLASMLexer.dll obj/hlasm_ilexer.o obj/HLASMLexer.res exports.def -s -luser32 || exit 1
 
 echo ""
 echo "Done: bin/HLASMLexer.dll"

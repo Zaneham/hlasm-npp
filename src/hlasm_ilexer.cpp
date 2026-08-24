@@ -186,6 +186,7 @@ struct FuncItem { TCHAR _itemName[64]; PFUNCPLUGINCMD _pFunc; int _cmdID; bool _
 /* ---- NPP / Scintilla bits for the card-boundary rulers ---- */
 #define NPPMSG                   (WM_USER + 1000)
 #define NPPM_GETCURRENTSCINTILLA (NPPMSG + 4)
+#define NPPM_GETPLUGINSCONFIGDIR (NPPMSG + 46)
 #define NPPN_FIRST               1000
 #define NPPN_FILEOPENED          (NPPN_FIRST + 4)
 #define NPPN_BUFFERACTIVATED     (NPPN_FIRST + 10)
@@ -257,9 +258,41 @@ static void cmdAbout() {
         L"HLASM Lexer", MB_OK | MB_ICONINFORMATION);
 }
 
+/* ---- Config XML ----
+ * NPP refuses to load any external lexer without plugins\Config\<name>.xml
+ * and reports the refusal as "not compatible with the current version",
+ * which sends people hunting for a bad build. Plugins Admin unpacks into
+ * plugins\<name>\ and never touches Config, so shipping the file in the zip
+ * does not help. Write it ourselves instead. setInfo runs before NPP looks,
+ * so this lands in time for the same launch. */
+#include "hlasm_config_xml.h"
+
+/* Only ever creates a missing file, so hand-edited colours survive. */
+static void EnsureConfigXml() {
+    wchar_t dir[MAX_PATH] = { 0 };
+    SendMessage(g_nppData._nppHandle, NPPM_GETPLUGINSCONFIGDIR,
+                MAX_PATH, (LPARAM)dir);
+    if (!dir[0]) return;
+
+    static const wchar_t leaf[] = L"\\HLASMLexer.xml";
+    wchar_t path[MAX_PATH];
+    if (wcslen(dir) + wcslen(leaf) + 1 > MAX_PATH) return;
+    wcscpy(path, dir);
+    wcscat(path, leaf);
+    if (GetFileAttributesW(path) != INVALID_FILE_ATTRIBUTES) return;
+
+    CreateDirectoryW(dir, NULL);   /* usually already there */
+    HANDLE h = CreateFileW(path, GENERIC_WRITE, 0, NULL, CREATE_NEW,
+                           FILE_ATTRIBUTE_NORMAL, NULL);
+    if (h == INVALID_HANDLE_VALUE) return;
+    DWORD written = 0;
+    WriteFile(h, kConfigXml, (DWORD)(sizeof(kConfigXml) - 1), &written, NULL);
+    CloseHandle(h);
+}
+
 extern "C" {
 BOOL          isUnicode() { return TRUE; }
-void          setInfo(NppData nd) { g_nppData = nd; }
+void          setInfo(NppData nd) { g_nppData = nd; EnsureConfigXml(); }
 const TCHAR * getName() { return TEXT("HLASM Lexer"); }
 FuncItem *    getFuncsArray(int *n) {
     lstrcpy(g_funcItems[0]._itemName, TEXT("About HLASM Lexer"));
